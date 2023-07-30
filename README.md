@@ -61,5 +61,5 @@ nightlight toggle
 ...or...
 
 ```bash
-npx nightlight toggle
+npx nightlight-cli toggle
 ```

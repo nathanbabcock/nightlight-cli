@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Control Windows 10/11's Night Light feature programmatically.",
   "main": "dist/cli.ts",
+  "repository": "github:nathanbabcock/nightlight-cli",
   "type": "module",
   "bin": {
     "nightlight": "./dist/cli.js"

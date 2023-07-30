@@ -11,7 +11,7 @@ help from ChatGPT.
 For changing the scheduled Night Light settings via a slightly different
 registry key, see this post: <https://superuser.com/a/1209192>.
 
-## Compatibility & Contribution
+## Compatibility
 
 Windows Version | Status
 --------------- | ----------
@@ -21,21 +21,45 @@ Windows 10 21H2 | ❔ Untested but should work
 Please open an issue if you find that this package does not work on your version
 of Windows.
 
-Also feel free to make a PR with other languages or CLI wrappers.
+## Contribution
 
-## Getting started (Node.js)
+Since this works by modifying a single registry key, it can be done in any
+language. A few examples are implemented already.
+
+Language     | Status
+------------ | ------
+TypeScript   | ✅
+CLI (NodeJS) | ✅
+C#           | [⬆️ upstream](https://github.com/Maclay74/tiny-screen/blob/eb829186159309f01b31fe6d4d5201b5e63e07bd/TinyScreen/Src/Services/NightLight.cs)
+Python       | [✏️ Open a PR](https://github.com/nathanbabcock/nightlight-cli/compare)
+Rust         | [✏️ Open a PR](https://github.com/nathanbabcock/nightlight-cli/compare)
+Powershell   | [✏️ Open a PR](https://github.com/nathanbabcock/nightlight-cli/compare)
+Other        | [✏️ Open a PR](https://github.com/nathanbabcock/nightlight-cli/compare)
+
+## Getting started (TypeScript)
 
 ```ts
 const nightLight = new NightLight()
+
 console.log('Supported:', nightLight.supported())
+
 console.log('Enabled:', await nightLight.enabled())
+
 console.log('Toggling')
 await nightLight.toggle()
+
 console.log('Enabled:', await nightLight.enabled())
 ```
 
 ## Getting started (CLI)
 
 ```bash
-# TODO
+npm i -g nightlight-cli
+nightlight toggle
+```
+
+...or...
+
+```bash
+npx nightlight toggle
 ```

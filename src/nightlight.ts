@@ -6,7 +6,7 @@ const keyPath =
 /**
  * A class for inspecting Windows 10/11's Night Light feature.
  */
-class NightLight {
+export class NightLight {
   private _registryKey: WinReg.Registry
 
   constructor() {
@@ -37,11 +37,11 @@ class NightLight {
   }
 
   async enable(): Promise<void> {
-    if (this.supported() && (await this.enabled())) this.toggle()
+    if (this.supported() && !(await this.enabled())) this.toggle()
   }
 
   async disable(): Promise<void> {
-    if (this.supported() && !(await this.enabled())) this.toggle()
+    if (this.supported() && (await this.enabled())) this.toggle()
   }
 
   async toggle(): Promise<void> {

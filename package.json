@@ -1,0 +1,22 @@
+{
+  "name": "night-light-cli",
+  "version": "1.0.0",
+  "description": "",
+  "main": "night-light.ts",
+  "type": "module",
+  "scripts": {
+    "start": "node --loader ts-node/esm night-light.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "winreg": "^1.2.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.4.5",
+    "@types/winreg": "^1.2.32",
+    "ts-node": "^10.9.1",
+    "typescript": "5.2.0-beta"
+  }
+}

@@ -1,7 +1,7 @@
 {
   "name": "nightlight-cli",
   "version": "1.0.0",
-  "description": "Control Windows 10/11's Night Light feature programatically.",
+  "description": "Control Windows 10/11's Night Light feature programmatically.",
   "main": "dist/cli.ts",
   "type": "module",
   "bin": {

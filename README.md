@@ -1,6 +1,6 @@
 # Night Light CLI 🌓
 
-> Control Windows 10/11's Night Light feature programatically.
+> Control Windows 10/11's Night Light feature programmatically.
 
 The binary format of the registry value was reverse engineered from
 [`NightLight.cs`](https://github.com/Maclay74/tiny-screen/blob/eb829186159309f01b31fe6d4d5201b5e63e07bd/TinyScreen/Src/Services/NightLight.cs)

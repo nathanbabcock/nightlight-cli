@@ -1,15 +1,18 @@
 {
-  "name": "night-light-cli",
+  "name": "nightlight-cli",
   "version": "1.0.0",
-  "description": "",
-  "main": "night-light.ts",
+  "description": "Control Windows 10/11's Night Light feature programatically.",
+  "main": "src/nightlight.ts",
+  "bin": {
+    "nightlight": "dist/cli.js"
+  },
   "type": "module",
   "scripts": {
-    "start": "node --loader ts-node/esm night-light.ts"
+    "start": "node --loader ts-node/esm src/nightlight.ts",
+    "nightlight": "nightlight"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "author": "Nathan Babcock",
+  "license": "MIT",
   "dependencies": {
     "winreg": "^1.2.4"
   },

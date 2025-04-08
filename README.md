@@ -30,10 +30,11 @@ Language     | Status
 ------------ | ------
 TypeScript   | ✅
 CLI (NodeJS) | ✅
+Powershell   | ✅
 C#           | [⬆️ upstream](https://github.com/Maclay74/tiny-screen/blob/eb829186159309f01b31fe6d4d5201b5e63e07bd/TinyScreen/Src/Services/NightLight.cs)
 Python       | [✏️ Open a PR](https://github.com/nathanbabcock/nightlight-cli/compare)
 Rust         | [✏️ Open a PR](https://github.com/nathanbabcock/nightlight-cli/compare)
-Powershell   | [✏️ Open a PR](https://github.com/nathanbabcock/nightlight-cli/compare)
+
 Other        | [✏️ Open a PR](https://github.com/nathanbabcock/nightlight-cli/compare)
 
 ## Getting started (TypeScript)
@@ -62,4 +63,22 @@ nightlight toggle
 
 ```bash
 npx nightlight-cli toggle
+```
+
+## Getting started (Powershell)
+```powershell
+Import-Module <path_to_psm1_file>
+
+# Check if Night Light is supported
+Test-NightLightSupported
+
+# Enable Night Light
+Enable-NightLight
+
+# Toggle/Switch Night Light
+# If enabled, disables Night Light, and vice versa.
+Switch-NightLight
+
+# Disable NightLight
+Disable-NightLight
 ```

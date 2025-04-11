@@ -29,7 +29,6 @@ language. A few examples are implemented already.
 ### To Do
 
 - [ ] Implement scheduled Night Light functionality
-- [ ] Add more language implementations
 
 Language     | Status
 ------------ | ------

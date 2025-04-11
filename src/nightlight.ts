@@ -1,28 +1,47 @@
 import WinReg from 'winreg'
 
-const keyPath =
+const STATE_KEY_PATH =
   '\\Software\\Microsoft\\Windows\\CurrentVersion\\CloudStore\\Store\\DefaultAccount\\Current\\default$windows.data.bluelightreduction.bluelightreductionstate\\windows.data.bluelightreduction.bluelightreductionstate'
+
+const SETTINGS_KEY_PATH =
+  '\\Software\\Microsoft\\Windows\\CurrentVersion\\CloudStore\\Store\\DefaultAccount\\Current\\default$windows.data.bluelightreduction.settings\\windows.data.bluelightreduction.settings'
+
+const MIN_KELVIN = 1200 // Maximum warmth (100% strength)
+const MAX_KELVIN = 6500 // Neutral (0% strength)
 
 /**
  * A class for inspecting Windows 10/11's Night Light feature.
  */
 export class NightLight {
   private _registryKey: WinReg.Registry
+  private _settingsKey: WinReg.Registry
 
   constructor() {
     this._registryKey = new WinReg({
       hive: WinReg.HKCU,
-      key: keyPath,
+      key: STATE_KEY_PATH,
+    })
+    this._settingsKey = new WinReg({
+      hive: WinReg.HKCU,
+      key: SETTINGS_KEY_PATH,
     })
   }
 
   supported(): boolean {
-    return this._registryKey != null
+    return this._registryKey != null && this._settingsKey != null
   }
 
   private getData(): Promise<WinReg.RegistryItem> {
     return new Promise<WinReg.RegistryItem>((resolve, reject) =>
       this._registryKey.get('Data', (err, result) =>
+        err ? reject(err) : resolve(result)
+      )
+    )
+  }
+
+  private getSettingsData(): Promise<WinReg.RegistryItem> {
+    return new Promise<WinReg.RegistryItem>((resolve, reject) =>
+      this._settingsKey.get('Data', (err, result) =>
         err ? reject(err) : resolve(result)
       )
     )
@@ -77,6 +96,67 @@ export class NightLight {
         err ? reject(err) : resolve()
       })
     )
+  }
+
+  async getStrength(): Promise<number> {
+    if (!this.supported()) return 0
+    const data = await this.getSettingsData()
+    if (!data) return 0
+    const bytes = hexToBytes(data.value)
+    const kelvin = this.bytesToKelvin(bytes[0x23], bytes[0x24])
+    return this.kelvinToPercentage(kelvin)
+  }
+
+  async setStrength(percentage: number): Promise<void> {
+    if (!this.supported()) return
+    
+    // Clamp percentage between 0-100
+    percentage = Math.max(0, Math.min(100, percentage))
+    
+    // Convert percentage to kelvin
+    const kelvin = this.percentageToKelvin(percentage)
+    
+    const rawData = await this.getSettingsData()
+    if (!rawData) return
+    const data = hexToBytes(rawData.value)
+
+    // Calculate bytes using the PowerShell script's formula
+    const tempHi = Math.floor(kelvin / 64)
+    const tempLo = ((kelvin - (tempHi * 64)) * 2) + 128
+
+    // Update strength bytes (indices 0x23, 0x24)
+    data[0x23] = tempLo
+    data[0x24] = tempHi
+
+    // Update timestamp bytes
+    for (let i = 10; i < 15; i++) {
+      if (data[i] !== 0xff) {
+        data[i]++
+        break
+      }
+    }
+
+    const newDataHex = bytesToHex(data)
+    return new Promise<void>((resolve, reject) =>
+      this._settingsKey.set('Data', WinReg.REG_BINARY, newDataHex, err => {
+        err ? reject(err) : resolve()
+      })
+    )
+  }
+
+  private bytesToKelvin(loTemp: number, hiTemp: number): number {
+    // Convert bytes back to kelvin using the inverse of the PowerShell formula
+    return (hiTemp * 64) + ((loTemp - 128) / 2)
+  }
+
+  private kelvinToPercentage(kelvin: number): number {
+    // Inverse linear mapping from kelvin to percentage
+    return 100 - ((kelvin - MIN_KELVIN) / (MAX_KELVIN - MIN_KELVIN)) * 100
+  }
+
+  private percentageToKelvin(percentage: number): number {
+    // Linear mapping from percentage to kelvin
+    return MAX_KELVIN - (percentage / 100) * (MAX_KELVIN - MIN_KELVIN)
   }
 }
 

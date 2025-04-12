@@ -1,12 +1,17 @@
 # NightLight.ps1
 # PowerShell script for controlling Windows 10/11 Night Light feature
 
-# Registry path for Night Light settings
-$keyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\DefaultAccount\Current\default`$windows.data.bluelightreduction.bluelightreductionstate\windows.data.bluelightreduction.bluelightreductionstate"
+# Registry paths for Night Light settings
+$stateKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\DefaultAccount\Current\default`$windows.data.bluelightreduction.bluelightreductionstate\windows.data.bluelightreduction.bluelightreductionstate"
+$settingsKeyPath = "HKCU:\Software\Microsoft\Windows\CurrentVersion\CloudStore\Store\DefaultAccount\Current\default`$windows.data.bluelightreduction.settings\windows.data.bluelightreduction.settings"
+
+# Temperature constants
+$MIN_KELVIN = 1200  # Maximum warmth (100% strength)
+$MAX_KELVIN = 6500  # Neutral (0% strength)
 
 # Check if Night Light feature is supported
 function Test-NightLightSupported {
-    return Test-Path -Path $keyPath
+    return (Test-Path -Path $stateKeyPath) -and (Test-Path -Path $settingsKeyPath)
 }
 
 # Get the registry data
@@ -16,7 +21,7 @@ function Get-NightLightData {
     }
     
     try {
-        $regItem = Get-ItemProperty -Path $keyPath -Name "Data" -ErrorAction Stop
+        $regItem = Get-ItemProperty -Path $stateKeyPath -Name "Data" -ErrorAction Stop
         return $regItem.Data
     }
     catch {
@@ -111,12 +116,104 @@ function Switch-NightLight {
     
     # Update the registry
     try {
-        Set-ItemProperty -Path $keyPath -Name "Data" -Value $newData -Type Binary
+        Set-ItemProperty -Path $stateKeyPath -Name "Data" -Value $newData -Type Binary
     }
     catch {
         Write-Error "Failed to update Night Light registry data: $_"
     }
 }
 
+# Convert Kelvin temperature to percentage
+function ConvertFrom-Kelvin {
+    param([int]$kelvin)
+    return 100 - (($kelvin - $MIN_KELVIN) / ($MAX_KELVIN - $MIN_KELVIN)) * 100
+}
+
+# Convert percentage to Kelvin temperature
+function ConvertTo-Kelvin {
+    param([int]$percentage)
+    return $MAX_KELVIN - ($percentage / 100) * ($MAX_KELVIN - $MIN_KELVIN)
+}
+
+# Get current Night Light strength as percentage
+function Get-NightLightStrength {
+    if (-not (Test-NightLightSupported)) {
+        Write-Error "Night Light feature is not supported on this system."
+        return 0
+    }
+
+    try {
+        $data = Get-ItemProperty -Path $settingsKeyPath -Name "Data" -ErrorAction Stop
+        if ($null -eq $data) {
+            return 0
+        }
+
+        # Get temperature bytes from indices 0x23 and 0x24
+        $tempLo = $data.Data[0x23]
+        $tempHi = $data.Data[0x24]
+
+        # Convert bytes to kelvin
+        $kelvin = ($tempHi * 64) + (($tempLo - 128) / 2)
+
+        # Convert kelvin to percentage
+        return [Math]::Round((ConvertFrom-Kelvin $kelvin))
+    }
+    catch {
+        Write-Error "Failed to read Night Light strength: $_"
+        return 0
+    }
+}
+
+# Set Night Light strength percentage
+function Set-NightLightStrength {
+    param(
+        [Parameter(Mandatory=$true)]
+        [ValidateRange(0,100)]
+        [int]$Percentage
+    )
+
+    if (-not (Test-NightLightSupported)) {
+        Write-Error "Night Light feature is not supported on this system."
+        return
+    }
+
+    try {
+        # Get current settings data
+        $data = Get-ItemProperty -Path $settingsKeyPath -Name "Data" -ErrorAction Stop
+        if ($null -eq $data) {
+            Write-Error "Could not retrieve Night Light settings data."
+            return
+        }
+
+        # Convert percentage to kelvin
+        $kelvin = ConvertTo-Kelvin $Percentage
+
+        # Calculate bytes for the temperature
+        $tempHi = [Math]::Floor($kelvin / 64)
+        $tempLo = (($kelvin - ($tempHi * 64)) * 2) + 128
+
+        # Create a copy of the current data
+        $newData = $data.Data.Clone()
+
+        # Update temperature bytes (indices 0x23, 0x24)
+        $newData[0x23] = $tempLo
+        $newData[0x24] = $tempHi
+
+        # Update timestamp bytes
+        for ($i = 10; $i -lt 15; $i++) {
+            if ($newData[$i] -ne 0xff) {
+                $newData[$i]++
+                break
+            }
+        }
+
+        # Update the registry
+        Set-ItemProperty -Path $settingsKeyPath -Name "Data" -Value $newData -Type Binary
+    }
+    catch {
+        Write-Error "Failed to update Night Light strength: $_"
+    }
+}
+
 # Export functions when used as a module
-Export-ModuleMember -Function Test-NightLightSupported, Test-NightLightEnabled, Enable-NightLight, Disable-NightLight, Switch-NightLight
+Export-ModuleMember -Function Test-NightLightSupported, Test-NightLightEnabled, Enable-NightLight, Disable-NightLight, Switch-NightLight, Get-NightLightStrength, Set-NightLightStrength

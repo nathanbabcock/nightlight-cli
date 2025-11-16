@@ -35,8 +35,8 @@ Language     | Status
 TypeScript   | ✅
 CLI (NodeJS) | ✅
 Powershell   | ✅
+Python       | ✅
 C#           | [⬆️ upstream](https://github.com/Maclay74/tiny-screen/blob/eb829186159309f01b31fe6d4d5201b5e63e07bd/TinyScreen/Src/Services/NightLight.cs)
-Python       | [✏️ Open a PR](https://github.com/nathanbabcock/nightlight-cli/compare)
 Rust         | [✏️ Open a PR](https://github.com/nathanbabcock/nightlight-cli/compare)
 
 Other        | [✏️ Open a PR](https://github.com/nathanbabcock/nightlight-cli/compare)
@@ -113,6 +113,37 @@ Get-NightLightStrength
 Set-NightLightStrength -Percentage 75
 ```
 
+## Getting started (Python)
+
+### As a module:
+```python
+from nightlight import NightLight
+
+night_light = NightLight()
+
+# Check if Night Light is supported
+print(f"Supported: {night_light.supported()}")
+
+# Check if Night Light is enabled
+print(f"Enabled: {night_light.enabled()}")
+
+# Enable Night Light
+night_light.enable()
+
+# Disable Night Light
+night_light.disable()
+
+# Toggle Night Light
+night_light.toggle()
+
+# Get current strength (returns 0-100%)
+strength = night_light.get_strength()
+print(f"Current strength: {strength}%")
+
+# Set strength (accepts 0-100%)
+night_light.set_strength(75)
+```
+
 ## Strength Control
 
 The Night Light strength can be controlled on a scale from 0% (coolest) to 100% (warmest). This corresponds to color temperatures from 6500K to 1200K. The strength can be controlled using any of the provided implementations:
@@ -120,3 +151,4 @@ The Night Light strength can be controlled on a scale from 0% (coolest) to 100% 
 - **CLI**: `nightlight strength [percentage]`
 - **TypeScript**: `nightLight.getStrength()` and `nightLight.setStrength(percentage)`
 - **PowerShell**: `Get-NightLightStrength` and `Set-NightLightStrength -Percentage value`
+- **Python**: `night_light.get_strength()` and `night_light.set_strength(percentage)`

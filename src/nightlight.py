@@ -174,7 +174,7 @@ class NightLight:
         percentage = max(0, min(100, percentage))
 
         # Convert percentage to kelvin
-        kelvin = self._percentage_to_kelvin(percentage)
+        kelvin = round(self._percentage_to_kelvin(percentage))
 
         data = self._get_settings_data()
         if data is None:

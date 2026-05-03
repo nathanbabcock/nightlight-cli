@@ -1,3 +1,7 @@
+**🚨 Warning:** There have been [recent reports](https://github.com/nathanbabcock/nightlight-cli/issues/11) that due to changes in recent Windows updates this doesn't work anymore, so please use caution when referring to this implementation. Please [open a PR](https://github.com/nathanbabcock/nightlight-cli/compare) if you come up with a fix that works in 2026 and onwards!
+
+---
+
 # Night Light CLI 🌓
 
 > Control Windows 10/11's Night Light feature programmatically.
